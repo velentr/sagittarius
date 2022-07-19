@@ -1,0 +1,68 @@
+#!/usr/bin/env guile
+!#
+
+;;; SPDX-FileCopyrightText: 2022 Brian Kubisiak <brian@kubisiak.com>
+;;;
+;;; SPDX-License-Identifier: GPL-3.0-only
+
+(use-modules (sagittarius config)
+             (sagittarius subprocess))
+
+(define (assert cond fail-message)
+  (if (not cond)
+      (error fail-message)))
+
+(define foo-profile
+  (profile #:email "foo@bar.com"
+           #:keys '("ssh-rsa AAAA")))
+
+(assert (profile? foo-profile)
+        "cannot construct profile")
+
+(assert (equal? (profile->email foo-profile)
+                "foo@bar.com")
+        "cannot get profile's email")
+
+(assert (equal? (profile->keys foo-profile)
+                '("ssh-rsa AAAA"))
+        "cannot get profile's keys")
+
+(define bar-profile
+  (profile #:email "bar@bar.com"
+           #:keys '("ssh-rsa BBBB" "ssh-rsa CCCC")))
+
+(define baz-profile
+  (profile #:email "baz@bar.com"
+           #:keys '("ssh-rsa DDDD")))
+
+(define foo-repository
+  (repository #:name "foo/bar"
+              #:ro (list bar-profile)
+              #:rw (list foo-profile)))
+
+(assert (can-read-repository foo-repository foo-profile)
+        "rw profile cannot read repository")
+
+(assert (can-write-repository foo-repository foo-profile)
+        "rw profile cannot write repository")
+
+(assert (can-read-repository foo-repository bar-profile)
+        "ro profile cannot read repository")
+
+(assert (not (can-write-repository foo-repository bar-profile))
+        "ro profile can write repository")
+
+(assert (not (can-read-repository foo-repository baz-profile))
+        "profile can read repository")
+
+(assert (not (can-write-repository foo-repository baz-profile))
+        "profile can write repository")
+
+(assert (equal? (call "ls")
+                '("LICENSES" "pre-inst-env.sh" "sagittarius" "sagittarius.scm"
+                  "scripts"))
+        "cannot call 'ls'")
+
+(assert (not (call "false")) "false does not fail")
+
+(assert (call "true") "true does not succeed")

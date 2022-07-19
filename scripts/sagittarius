@@ -1,0 +1,17 @@
+#!/usr/bin/env guile
+!#
+
+;;; SPDX-FileCopyrightText: 2022 Brian Kubisiak <brian@kubisiak.com>
+;;;
+;;; SPDX-License-Identifier: GPL-3.0-only
+
+(use-modules (sagittarius)
+             (sagittarius path))
+
+(define (load-config)
+  (load (home "sagittarius-config" "config.scm")))
+
+(define* (main #:optional (args (command-line)))
+  (apply sagittarius-main (cons load-config args)))
+
+(main)
