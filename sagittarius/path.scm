@@ -3,9 +3,11 @@
 ;;; SPDX-License-Identifier: GPL-3.0-only
 
 (define-module (sagittarius path)
-  #:export (git
+  #:export (directory?
+            git
             git-receive-pack
             home
+            join
             sagittarius-bin))
 
 ;;; Commentary:
@@ -22,7 +24,16 @@
 (define sagittarius-bin
   "/home/bkubisiak/src/sagittarius/pre-inst-env.sh sagittarius")
 
+(define (directory? path)
+  "Determine if PATH is a directory."
+  (let ((st (stat path #f)))
+    (and st (eq? (stat:type st) 'directory))))
+
+(define (join . directories)
+  "Return the DIRECTORIES components joined together as a path."
+  (string-join directories "/"))
+
 (define (home . directories)
   "Return the path with DIRECTORIES components in the user's home directory."
   (let ((HOME (getenv "HOME")))
-    (string-join (cons HOME directories) "/")))
+    (apply join (cons HOME directories))))

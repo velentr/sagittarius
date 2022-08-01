@@ -5,13 +5,12 @@
 (define-module (sagittarius)
   #:use-module (ice-9 optargs)
   #:use-module (sagittarius config)
+  #:use-module (sagittarius git)
   #:use-module (sagittarius path)
-  #:use-module (sagittarius subprocess)
   #:export (sagittarius-main))
 
 (define (init)
-  (let ((sagit-dir (home "sagittarius-config")))
-    (check-call git "init" sagit-dir)))
+  (git-init (home "sagittarius-config")))
 
 (define (strip-quotes s)
   (let* ((len (string-length s))
