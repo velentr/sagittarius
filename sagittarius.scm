@@ -55,8 +55,15 @@
               (profile->keys profile))))
          profiles)))))
 
+(define (reconfigure-repositories config)
+  (for-each
+   (lambda (repo)
+     (git-init (home (repository->name repo))))
+   (config->repositories config)))
+
 (define (reconfigure config)
-  (reconfigure-authorized-keys config))
+  (reconfigure-authorized-keys config)
+  (reconfigure-repositories config))
 
 (define (sagittarius-main load-config . command-line)
   (let ((command (cadr command-line))

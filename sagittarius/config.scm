@@ -11,6 +11,7 @@
             config->authorized-keys
             config->profile
             config->profiles
+            config->repositories
             config->repository
             profile
             profile?
