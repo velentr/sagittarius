@@ -4,6 +4,7 @@
 
 (define-module (sagittarius path)
   #:export (directory?
+            file?
             git
             git-receive-pack
             home
@@ -24,10 +25,18 @@
 (define sagittarius-bin
   "/home/bkubisiak/src/sagittarius/pre-inst-env.sh sagittarius")
 
+(define (stat-is-type path type)
+  "Determine if the inode at PATH has the given TYPE."
+  (let ((st (stat path #f)))
+    (and st (eq? (stat:type st) type))))
+
 (define (directory? path)
   "Determine if PATH is a directory."
-  (let ((st (stat path #f)))
-    (and st (eq? (stat:type st) 'directory))))
+  (stat-is-type path 'directory))
+
+(define (file? path)
+  "Determine if PATH is a regular file."
+  (stat-is-type path 'regular))
 
 (define (join . directories)
   "Return the DIRECTORIES components joined together as a path."

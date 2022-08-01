@@ -15,11 +15,13 @@
 ;;; Code:
 
 (define (git-repo? path)
-  "Determine if PATH is a valid non-bare git repository."
-  (let ((git-dir (join path ".git")))
-    (directory? git-dir)))
+  "Determine if PATH is a valid bare git repository."
+  (let ((obj-dir (join path "objects"))
+        (head-file (join path "HEAD")))
+    (and (directory? obj-dir)
+         (file? head-file))))
 
 (define (git-init path)
   "Create a new git repository at PATH, if one does not already exist."
   (if (not (git-repo? path))
-      (check-call git "init" path)))
+      (check-call git "init" "--bare" path)))
