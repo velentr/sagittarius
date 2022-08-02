@@ -6,10 +6,19 @@
 ;;; SPDX-License-Identifier: GPL-3.0-only
 
 (use-modules (sagittarius)
-             (sagittarius path))
+             (sagittarius path)
+             (sagittarius subprocess))
 
 (define (load-config)
-  (load (home "sagittarius-config" "config.scm")))
+  (eval-string
+   (string-join
+    (check-call git
+                "-C"
+                (home "sagittarius-config")
+                "cat-file"
+                "--textconv"
+                "master:config.scm")
+    "\n")))
 
 (define* (main #:optional (args (command-line)))
   (apply sagittarius-main (cons load-config args)))
