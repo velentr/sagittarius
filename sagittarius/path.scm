@@ -16,17 +16,23 @@
 ;;;
 ;;; Path manipulation and constants.
 ;;;
+;;; This module has roughly 3 functions relating to filesystem paths:
+;;;
+;;; 1. Define paths for all executables called via subprocess. Normally these
+;;;    are found from $PATH, but on systems like guix or nix it is convenient to
+;;;    replace these with absolute paths to package inputs.
+;;;
+;;; 2. Functionality for examining files and directories.
+;;;
+;;; 3. Code for creating and manipulating path strings given directory
+;;;    components.
+;;;
 ;;; Code:
 
-;; FIXME
-(define git
-  "/home/bkubisiak/.guix-home/profile/bin/git")
-(define git-receive-pack
-  "/home/bkubisiak/.guix-home/profile/bin/git-receive-pack")
-(define git-upload-pack
-  "/home/bkubisiak/.guix-home/profile/bin/git-upload-pack")
-(define sagittarius-bin
-  "/home/bkubisiak/src/sagittarius/pre-inst-env.sh sagittarius")
+(define git "git")
+(define git-receive-pack "git-receive-pack")
+(define git-upload-pack "git-upload-pack")
+(define sagittarius-bin "sagittarius")
 
 (define (stat-is-type path type)
   "Determine if the inode at PATH has the given TYPE."
