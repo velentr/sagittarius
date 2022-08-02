@@ -7,6 +7,7 @@
             file?
             git
             git-receive-pack
+            git-upload-pack
             home
             join
             sagittarius-bin))
@@ -22,6 +23,8 @@
   "/home/bkubisiak/.guix-home/profile/bin/git")
 (define git-receive-pack
   "/home/bkubisiak/.guix-home/profile/bin/git-receive-pack")
+(define git-upload-pack
+  "/home/bkubisiak/.guix-home/profile/bin/git-upload-pack")
 (define sagittarius-bin
   "/home/bkubisiak/src/sagittarius/pre-inst-env.sh sagittarius")
 

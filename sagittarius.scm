@@ -23,7 +23,8 @@
         (substring s 1 (- len 1))
         s)))
 
-(define (receive-pack args config)
+(define (handle-git-remote args config)
+  "Handle a git command on a remote, with cli ARGS and the sagittarius CONFIG."
   (let* ((user (car args))
          (profile (config->profile config user))
          (SSH_ORIGINAL_COMMAND (string-split (getenv "SSH_ORIGINAL_COMMAND")
@@ -31,12 +32,18 @@
          (command (car SSH_ORIGINAL_COMMAND))
          (repo-name (strip-quotes (cadr SSH_ORIGINAL_COMMAND)))
          (repository (config->repository config repo-name)))
-    (if (or (not (equal? command "git-receive-pack"))
-            (not repository)
-            (not profile)
-            (not (can-write-repository repository profile)))
+    (if (or (not repository)
+            (not profile))
         (exit #f)
-        (execlp git-receive-pack "git-receive-pack" repo-name))))
+        (cond
+         ((and (equal? command "git-receive-pack")
+               (can-write-repository repository profile))
+          (execlp git-receive-pack "git-receive-pack" repo-name))
+         ((and (equal? command "git-upload-pack")
+               (can-read-repository repository profile))
+          (execlp git-upload-pack "git-upload-pack" repo-name))
+         (else
+          (exit #f))))))
 
 (define (reconfigure-authorized-keys config)
   (let ((profiles (config->profiles config)))
@@ -48,7 +55,7 @@
              (for-each
               (lambda (key)
                 (format output-port
-                        "command=\"~a receive-pack ~a\" ~a~%"
+                        "command=\"~a handle-git-remote ~a\" ~a~%"
                         sagittarius-bin
                         email
                         key))
@@ -70,7 +77,7 @@
         (args (cddr command-line)))
     (cond ((equal? command "init")
            (init))
-          ((equal? command "receive-pack")
-           (receive-pack args (load-config)))
+          ((equal? command "handle-git-remote")
+           (handle-git-remote args (load-config)))
           ((equal? command "reconfigure")
            (reconfigure (load-config))))))
