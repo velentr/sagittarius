@@ -45,6 +45,16 @@
          (else
           (exit #f))))))
 
+(define (hook args config)
+  "Run a git hook on a repository."
+  (let* ((repo-name (car args))
+         (repository (config->repository config repo-name))
+         (hook-name (cadr args))
+         (hook (and repository
+                    (assoc-ref (repository->hooks repository) hook-name))))
+    (if hook
+        (hook))))
+
 (define (reconfigure-authorized-keys config)
   (let ((profiles (config->profiles config)))
     (call-with-output-file (config->authorized-keys config)
@@ -62,10 +72,32 @@
               (profile->keys profile))))
          profiles)))))
 
+(define (init-hooks repo repo-path)
+  (let ((hooks (repository->hooks repo))
+        (hooks-path (join repo-path "hooks"))
+        (repo-name (repository->name repo)))
+    (for-each
+     (lambda (hook-spec)
+       (let* ((hook-name (car hook-spec))
+              (hook-path (join hooks-path hook-name))
+              (hook-string
+               (format #f
+                       "#!/usr/bin/env sh~%~a hook ~a ~a~%"
+                       sagittarius-bin
+                       repo-name
+                       hook-name)))
+         (with-output-to-file hook-path
+           (lambda ()
+             (display hook-string)))
+         (chmod hook-path #o755)))
+     hooks)))
+
 (define (reconfigure-repositories config)
   (for-each
    (lambda (repo)
-     (git-init (home (repository->name repo))))
+     (let ((repo-path (home (repository->name repo))))
+       (git-init repo-path)
+       (init-hooks repo repo-path)))
    (config->repositories config)))
 
 (define (reconfigure config)
@@ -79,5 +111,7 @@
            (init))
           ((equal? command "handle-git-remote")
            (handle-git-remote args (load-config)))
+          ((equal? command "hook")
+           (hook args (load-config)))
           ((equal? command "reconfigure")
            (reconfigure (load-config))))))

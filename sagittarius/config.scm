@@ -19,6 +19,7 @@
             profile->keys
             repository
             repository?
+            repository->hooks
             repository->name))
 
 ;;; Commentary:
@@ -45,15 +46,16 @@ KEYS."
   (profile-constructor email keys))
 
 (define-record-type <repository>
-  (repository-constructor ro rw name)
+  (repository-constructor ro rw name hooks)
   repository?
   (ro repository->ro-profiles)
   (rw repository->rw-profiles)
-  (name repository->name))
+  (name repository->name)
+  (hooks repository->hooks))
 
-(define* (repository #:key (ro '()) (rw '()) name)
+(define* (repository #:key (ro '()) (rw '()) name (hooks '()))
   ;; FIXME: validate name
-  (repository-constructor ro rw name))
+  (repository-constructor ro rw name hooks))
 
 (define (repository->rd-keys repo)
   (let ((readers (append (repository->ro-profiles repo)
