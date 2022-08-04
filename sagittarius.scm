@@ -7,7 +7,8 @@
   #:use-module (sagittarius config)
   #:use-module (sagittarius git)
   #:use-module (sagittarius path)
-  #:export (sagittarius-main))
+  #:export (reconfigure
+            sagittarius-main))
 
 (define (init)
   (git-init (home "sagittarius-config")))
